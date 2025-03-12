@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        .socket {
+          width: 200px;
+          height: 200px;
+          position: absolute;
+          left: 50%;
+          margin-left: -100px;
+          top: 50%;
+          margin-top: -100px;
+        }
+        
+        .hex-brick {
+          background: #000000;
+          width: 30px;
+          height: 17px;
+          position: absolute;
+          top: 5px;
+        }
+        
+        .h2 { transform: rotate(60deg); }
+        .h3 { transform: rotate(-60deg); }
+        
+        .gel {
+          height: 30px;
+          width: 30px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          animation: pulse 2s infinite;
+        }
+        
+        .center-gel {
+          margin: -15px 0 0 -15px;
+          animation: none !important;
+        }
+        
+        .center-gel .hex-brick { 
+          background: #BDE1DC !important;
+          animation: none !important;
+        }
+        
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(0.01); }
+        }
+        
+        .gel i {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 10;
+          color: #2c3e50;
+          font-size: 14px;
+        }
+        </style>
+</head>
+<body>
+    <div class="socket ml-[16rem]"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const socket = document.querySelector('.socket');
+          const positions = [
+            { row: 0, margins: [-15, -15] }, // Center
+            { row: 1, margins: [-47, -15] }, { row: 1, margins: [-31, -43] },
+            { row: 1, margins: [1, -43] }, { row: 1, margins: [17, -15] },
+            { row: 1, margins: [-31, 13] }, { row: 1, margins: [1, 13] },
+            // Add all other positions here...
+          ];
+        
+          // Create gels
+          positions.forEach((pos, i) => {
+            const gel = createGel(pos, i);
+            socket.appendChild(gel);
+          });
+        
+          // Add social icons
+          addSocialIcons();
+        });
+        
+        function createGel(pos, index) {
+          const gel = document.createElement('div');
+          gel.className = `gel ${index === 0 ? 'center-gel' : ''}`;
+          
+          // Add hex bricks
+          ['', 'h2', 'h3'].forEach(c => {
+            const brick = document.createElement('div');
+            brick.className = `hex-brick ${c}`;
+            gel.appendChild(brick);
+          });
+        
+          // Position and animation
+          if(index !== 0) {
+            gel.style.marginLeft = `${pos.margins[0]}px`;
+            gel.style.marginTop = `${pos.margins[1]}px`;
+            gel.style.animationDelay = `${0.2 * pos.row}s`;
+          }
+        
+          return gel;
+        }
+        
+        function addSocialIcons() {
+          // Keep existing icon logic but target dynamically created elements
+          const icons = [/* icon classes */];
+          document.querySelectorAll('.gel:not(.center-gel)').forEach((gel, i) => {
+            const icon = document.createElement('i');
+            icon.className = icons[i % icons.length];
+            gel.appendChild(icon);
+          });
+        
+          // Add center SVG
+          const centerGel = document.querySelector('.center-gel');
+          // ... existing SVG code ...
+        }
+        </script>
+</body>
+</html>

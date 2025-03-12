@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>14x14 Hex Grid</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Add keyframes for initial flip animation */
+    @keyframes initialFlip {
+      0% { transform: rotateY(0deg); }
+      50% { transform: rotateY(180deg); }
+      100% { transform: rotateY(0deg); }
+    }
+
+    .hex-container {
+      position: relative;
+      width: 9em;
+      height: 8em;
+      display: inline-block;
+      margin-right: -18px;
+      perspective: 1000px;
+    }
+
+    .flip-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      color: #000;
+    }
+
+    .hex-front, .hex-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+    }
+
+    .hex-border {
+      background: #fff;
+      clip-path: polygon(50% 0%, 94% 23%, 94% 75%, 50% 100%, 5% 75%, 5% 25%);
+    }
+
+    .hex-inner {
+      position: absolute;
+      top: 0.5em;
+      left: 0.5em;
+      width: 8em;
+      height: 7em;
+      background: #000;
+      clip-path: polygon(50% 0%, 94% 23%, 94% 75%, 50% 100%, 5% 75%, 5% 25%);
+    }
+
+    .hex-back {
+      background: #fff;
+      clip-path: polygon(50% 0%, 94% 23%, 94% 75%, 50% 100%, 5% 75%, 5% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotateY(180deg);
+    }
+
+    .row {
+      white-space: nowrap;
+      margin-bottom: -51px;
+    }
+
+    .row.even {
+      margin-left: 64.5px;
+    }
+
+    .hex-container:hover .flip-content {
+      transform: rotateY(180deg);
+    }
+
+    .animated-words {
+    display: inline-block;
+    position: relative;
+    height: 2.5rem;
+    margin: 0rem 0;
+  }
+  .animated-words span {
+    position: absolute;
+    opacity: 0;
+    /* Total duration: 7 words x 3s = 21s */
+    animation: fade 21s infinite;
+    font-size: 4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  /* 
+    In the keyframes:
+    - 0%: start invisible.
+    - 5% of 21s (~1.05s): fade in to full opacity.
+    - 10% (~2.1s): remain fully visible.
+    - 14.29% (~3s): fade out to invisible.
+    - Remain invisible for the rest of the cycle.
+  */
+  @keyframes fade {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    10% { opacity: 1; }
+    14.29% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+  /* Set staggered delays so each word appears in sequence */
+  .animated-words span:nth-child(1) { animation-delay: 0s; }
+  .animated-words span:nth-child(2) { animation-delay: 3s; }
+  .animated-words span:nth-child(3) { animation-delay: 6s; }
+  .animated-words span:nth-child(4) { animation-delay: 9s; }
+  .animated-words span:nth-child(5) { animation-delay: 12s; }
+  .animated-words span:nth-child(6) { animation-delay: 15s; }
+  .animated-words span:nth-child(7) { animation-delay: 18s; }
+
+    /* Adjust content container spacing */
+    .content-container {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 12rem;
+    }
+    .explore-button {
+      background: #fff;
+      color: #000;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      margin-top: 2rem;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="content-container">
+    <div class="static-text text-[4.5rem] font-bold mb-[-1rem]">
+      Realize the future
+    </div>
+    
+    <div class="animated-words" style="font-style: italic;">
+      <span>Data Protection</span>
+      <span>Breach Response</span>
+      <span>Data Governance</span>
+      <span>Data Security</span>
+      <span>Data Processing</span>
+      <span>Data Discovery</span>
+      <span>Automation & Al</span>
+    </div>
+  
+    <div class="static-text text-[2.5rem] mt-11">
+      <span class="block">Know Your Data</span>
+      <span class="block" style="margin-top: -1.5rem;">Govern Your Data in-Peace</span>
+    </div>
+    
+    <button class="explore-button">Book a Demo</button>
+  </div>
+  
+  <div id="grid" class="absolute transform -translate-x-1/2 -translate-y-1/2" style="margin-left: 30.4rem; color: #000; width: 117rem; background-color: #000;">
+
+  </div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const rows = 17;
+    const cols = 14;
+    const verticalOffset = 7 * 0.866 * 2;
+    const icons = ['facebook', 'twitter', 'instagram', 'linkedin', 'github', 'youtube'];
+
+    // Create grid function
+    function createGrid() {
+      for (let row = 0; row < rows; row++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = `row ${row % 2 === 0 ? 'even' : ''}`;
+        
+        for (let col = 0; col < cols; col++) {
+          const container = document.createElement('div');
+          container.className = 'hex-container';
+          
+          const flipContent = document.createElement('div');
+          flipContent.className = 'flip-content';
+          
+          // Front face
+          const hexFront = document.createElement('div');
+          hexFront.className = 'hex-front';
+          
+          const border = document.createElement('div');
+          border.className = 'hex-border';
+          
+          const inner = document.createElement('div');
+          inner.className = 'hex-inner';
+          
+          hexFront.appendChild(border);
+          hexFront.appendChild(inner);
+          
+          // Back face
+          const hexBack = document.createElement('div');
+          hexBack.className = 'hex-back';
+          
+          const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+          const icon = document.createElement('i');
+          icon.className = `fab fa-${randomIcon} text-black text-3xl`;
+          
+          hexBack.appendChild(icon);
+          
+          flipContent.appendChild(hexFront);
+          flipContent.appendChild(hexBack);
+          container.appendChild(flipContent);
+          rowDiv.appendChild(container);
+        }
+        
+        grid.appendChild(rowDiv);
+        
+        if (row < rows - 1) {
+          const spacer = document.createElement('div');
+          spacer.style.height = `${verticalOffset}px`;
+          grid.appendChild(spacer);
+        }
+      }
+
+      // Add random initial flips
+      document.querySelectorAll('.flip-content').forEach(flipContent => {
+        const randomDelay = Math.random() * 2000; // 0-2 seconds
+        flipContent.style.animation = `initialFlip 1.2s ease-in-out ${randomDelay}ms 1`;
+      });
+    }
+
+    // Initialize grid when page loads
+    window.addEventListener('load', createGrid);
+  </script>
+</body>
+</html>
